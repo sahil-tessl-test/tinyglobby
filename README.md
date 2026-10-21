@@ -20,6 +20,9 @@ await glob(['files/*.ts', '!**/*.d.ts'], { cwd: 'src' });
 globSync('src/**/*.ts', { ignore: '**/*.d.ts' });
 ```
 
+`glob` is asynchronous and returns `Promise<string[]>`, a promise that resolves to an array of matching paths.
+`globSync` returns `string[]`, the same array of matching paths, synchronously.
+
 ## Documentation
 
 Visit https://superchupu.dev/tinyglobby to read the full documentation.
