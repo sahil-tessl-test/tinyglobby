@@ -5,13 +5,16 @@ tool_prefix="$HOME/.local"
 mkdir -p "$tool_prefix/bin"
 export PATH="$tool_prefix/bin:$PATH"
 
-echo 'Checking Node.js (26 or newer, as used for development in CI)'
+echo 'Checking Node.js (24 or newer for the TypeScript test runner)'
 node_major=0
 if command -v node >/dev/null 2>&1; then
-  node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"
+  if ! node_major="$(node -p 'Number(process.versions.node.split(".")[0])')"; then
+    echo 'The installed Node.js cannot start; installing a compatible release'
+    node_major=0
+  fi
 fi
 
-if [ "$node_major" -lt 26 ]; then
+if [ "$node_major" -lt 24 ]; then
   case "$(uname -s)" in
     Linux) node_os=linux ;;
     Darwin) node_os=darwin ;;
@@ -23,21 +26,21 @@ if [ "$node_major" -lt 26 ]; then
     *) echo 'Cannot install Node.js on this architecture' >&2; exit 1 ;;
   esac
 
-  echo 'Installing a Node.js 26 release in ~/.local'
+  echo 'Installing a Node.js 24 release in ~/.local'
   download_dir="$(mktemp -d)"
   trap 'rm -rf "$download_dir"' EXIT
   curl --fail --silent --show-error --location \
-    https://nodejs.org/dist/latest-v26.x/SHASUMS256.txt \
+    https://nodejs.org/dist/latest-v24.x/SHASUMS256.txt \
     --output "$download_dir/SHASUMS256.txt"
   archive="$(awk -v suffix="-$node_os-$node_arch.tar.gz" \
     'length($2) >= length(suffix) && substr($2, length($2) - length(suffix) + 1) == suffix { print $2 }' \
     "$download_dir/SHASUMS256.txt")"
   if [ -z "$archive" ] || [[ "$archive" == *$'\n'* ]]; then
-    echo 'Could not identify one compatible Node.js 26 archive' >&2
+    echo 'Could not identify one compatible Node.js 24 archive' >&2
     exit 1
   fi
   curl --fail --silent --show-error --location \
-    "https://nodejs.org/dist/latest-v26.x/$archive" --output "$download_dir/$archive"
+    "https://nodejs.org/dist/latest-v24.x/$archive" --output "$download_dir/$archive"
   (
     cd "$download_dir"
     awk -v name="$archive" '$2 == name' SHASUMS256.txt > selected-checksum.txt
