@@ -1,5 +1,8 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "files": {
+    "includes": ["**", "!!.tessl/plugins"]
+  },
   "vcs": {
     "enabled": true,
     "clientKind": "git",
